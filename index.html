@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Indigenous Clothing Dress-Up Game</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', cursive, sans-serif;
+            background-color: #f0e6d2;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: #fff;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #8b4513;
+        }
+        
+        .intro {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .game-area {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        
+        .character-section {
+            flex: 1;
+            min-width: 300px;
+            margin: 10px;
+            text-align: center;
+        }
+        
+        .character-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #8b4513;
+        }
+        
+        .character-container {
+            position: relative;
+            height: 400px;
+            width: 280px;
+            margin: 0 auto;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .character-base {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+        }
+        
+        .clothing-slot {
+            position: absolute;
+            z-index: 10;
+        }
+        
+        .clothing-options {
+            flex: 1;
+            min-width: 300px;
+            margin: 10px;
+            border: 2px dashed #8b4513;
+            border-radius: 10px;
+            padding: 10px;
+            background-color: #f9f9f9;
+        }
+        
+        .clothing-items {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .clothing-item {
+            width: 80px;
+            height: 80px;
+            cursor: grab;
+        }
+        
+        .clothing-item:hover {
+            transform: scale(1.1);
+        }
+        
+        .clothing-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .tooltip {
+            position: absolute;
+            background-color: rgba(139, 69, 19, 0.9);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            max-width: 300px;
+            z-index: 100;
+            visibility: hidden;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+        }
+        
+        .btn-restart {
+            display: block;
+            margin: 20px auto;
+            background-color: #8b4513;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .info-section {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e9ece5;
+            border-radius: 10px;
+        }
+
+        /* NEW STYLES */
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            background-color: #8b4513;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 18px;
+        }
+        
+        .timer, .score {
+            text-align: center;
+            padding: 5px 15px;
+            background-color: rgba(255,255,255,0.2);
+            border-radius: 5px;
+        }
+        
+        .score-breakdown {
+            display: none;
+            margin: 20px auto;
+            padding: 15px;
+            background-color: #f9f5f0;
+            border-radius: 10px;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .score-breakdown h3 {
+            color: #8b4513;
+            margin-bottom: 10px;
+        }
+        
+        .score-breakdown ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        
+        .score-breakdown li {
+            margin: 5px 0;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        
+        .score-breakdown li.correct {
+            background-color: rgba(144, 238, 144, 0.3);
+        }
+        
+        .score-breakdown li.incorrect {
+            background-color: rgba(255, 182, 193, 0.3);
+        }
+        
+        .final-score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #8b4513;
+            margin: 10px 0;
+        }
+        
+        .feedback-message {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        
+        .game-over-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .game-over-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            text-align: center;
+        }
+        
+        .game-over-content h2 {
+            color: #8b4513;
+            margin-bottom: 20px;
+        }
+        
+        .btn-play-again {
+            background-color: #8b4513;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .game-area {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Indigenous Clothing Dress-Up Game</h1>
+        <div class="intro">
+            <p>Learn about traditional clothing from Indigenous peoples of Canada! Drag and drop items onto the characters and hover over them to learn more about their cultural significance.</p>
+            <p><strong>Game Rules:</strong> Correctly matching clothing earns 1 point. Incorrect matches lose 1 point. Complete as fast as you can for bonus points!</p>
+        </div>
+        
+        <!-- NEW GAME STATS DISPLAY -->
+        <div class="game-stats">
+            <div class="timer">Time: <span id="timer-display">00:00</span></div>
+            <div class="score">Score: <span id="score-display">0</span></div>
+        </div>
+        
+        <div class="game-area">
+            <div class="character-section">
+                <div class="character-title">Female Character</div>
+                <div class="character-container" id="female-character">
+                    <img class="character-base" src="images/female-character.jpg" alt="Female character base">
+                    <!-- Clothing slots will be placed here -->
+                </div>
+            </div>
+            
+            <div class="character-section">
+                <div class="character-title">Male Character</div>
+                <div class="character-container" id="male-character">
+                    <img class="character-base" src="images/male-character.jpg" alt="Male character base">
+                    <!-- Clothing slots will be placed here -->
+                </div>
+            </div>
+            
+            <div class="clothing-options">
+                <h3>Clothing Items</h3>
+                <div class="clothing-items" id="clothing-items">
+                    <!-- Clothing items will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+        
+        <button class="btn-restart" id="restart-game">Restart Game</button>
+        
+        <!-- NEW SCORE BREAKDOWN SECTION -->
+        <div class="score-breakdown" id="score-breakdown">
+            <h3>Score Breakdown</h3>
+            <ul id="score-list"></ul>
+            <div class="final-score">Final Score: <span id="final-score">0</span></div>
+            <div class="feedback-message" id="feedback-message"></div>
+        </div>
+        
+        <div class="info-section">
+            <h3>About Indigenous Clothing in Canada</h3>
+            <p>Traditional Indigenous clothing in Canada varies widely across different nations and regions, reflecting the diversity of Indigenous cultures. These garments are not just functional but often carry deep cultural, spiritual, and historical significance.</p>
+            <p>Different Indigenous groups like the Inuit, Métis, First Nations (including Cree, Ojibwe, Mi'kmaq, and many others) each have their own distinctive clothing traditions that have evolved over generations.</p>
+        </div>
+    </div>
+    
+    <div class="tooltip" id="tooltip"></div>
+    
+    <!-- NEW GAME OVER OVERLAY -->
+    <div class="game-over-overlay" id="game-over-overlay">
+        <div class="game-over-content">
+            <h2>Game Complete!</h2>
+            <div class="final-score">Your Final Score: <span id="overlay-final-score">0</span></div>
+            <p id="overlay-time">Time: 00:00</p>
+            <p id="overlay-feedback"></p>
+            <button class="btn-play-again" id="play-again">Play Again</button>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tooltip = document.getElementById('tooltip');
+            const femaleCharacter = document.getElementById('female-character');
+            const maleCharacter = document.getElementById('male-character');
+            const clothingItems = document.getElementById('clothing-items');
+            const restartButton = document.getElementById('restart-game');
+            
+            // NEW VARIABLES
+            const timerDisplay = document.getElementById('timer-display');
+            const scoreDisplay = document.getElementById('score-display');
+            const scoreBreakdown = document.getElementById('score-breakdown');
+            const scoreList = document.getElementById('score-list');
+            const finalScoreElement = document.getElementById('final-score');
+            const feedbackMessage = document.getElementById('feedback-message');
+            const gameOverOverlay = document.getElementById('game-over-overlay');
+            const overlayFinalScore = document.getElementById('overlay-final-score');
+            const overlayTime = document.getElementById('overlay-time');
+            const overlayFeedback = document.getElementById('overlay-feedback');
+            const playAgainButton = document.getElementById('play-again');
+            
+            let timer;
+            let seconds = 0;
+            let score = 0;
+            let scoreHistory = [];
+            let gameActive = false;
+            
+            // Define clothing items with descriptions (using your original images)
+            const clothing = [
+                {
+                    id: 'amauti',
+                    name: 'Amauti',
+                    gender: 'female',
+                    image: 'images/amauti.png',
+                    description: 'The Amauti is a traditional parka worn by Inuit women. It has a special pouch (amaut) built into the back for carrying infants, keeping them warm while allowing mothers to continue their daily activities.',
+                    position: { top: '100px', left: '90px', width: '180px', height: '200px' }
+                },
+                {
+                    id: 'ribbon-skirt',
+                    name: 'Ribbon Skirt',
+                    gender: 'female',
+                    image: 'images/ribbon_skirt.png',
+                    description: 'Ribbon skirts are vibrant, colorful garments worn by many First Nations women. The ribbons represent connection to the earth and ancestors. Each color and design can carry personal or cultural meaning.',
+                    position: { top: '200px', left: '90px', width: '160px', height: '150px' }
+                },
+                {
+                    id: 'moccasins-f',
+                    name: 'Moccasins',
+                    gender: 'female',
+                    image: 'images/moccasinsf.png',
+                    description: 'Moccasins are traditional footwear made from soft leather (often moosehide or deerhide). Different nations have distinct patterns and beadwork styles that tell stories or represent their heritage.',
+                    position: { top: '350px', left: '100px', width: '120px', height: '50px' }
+                },
+                {
+                    id: 'medicine-pouch',
+                    name: 'Medicine Pouch',
+                    gender: 'female',
+                    image: 'images/medicinepouch.png',
+                    description: 'Medicine pouches are small bags worn around the neck that hold sacred items. They may contain herbs, stones, or other meaningful objects that provide spiritual protection or healing.',
+                    position: { top: '150px', left: '140px', width: '40px', height: '50px' }
+                },
+                {
+                    id: 'ribbon-shirt',
+                    name: 'Ribbon Shirt',
+                    gender: 'male',
+                    image: 'images/ribbonshirt.png',
+                    description: 'Ribbon shirts are worn by many First Nations and Métis men for ceremonies and celebrations. The ribbons often represent different aspects of their identity, community, and connection to the land.',
+                    position: { top: '100px', left: '90px', width: '180px', height: '180px' }
+                },
+                {
+                    id: 'regalia-vest',
+                    name: 'Traditional Vest',
+                    gender: 'male',
+                    image: 'images/traditionalvest.png',
+                    description: 'Traditional vests are often elaborately decorated with beadwork, quillwork, or painted designs. Patterns may represent family histories, achievements, or spiritual connections.',
+                    position: { top: '120px', left: '100px', width: '140px', height: '120px' }
+                },
+                {
+                    id: 'moccasins-m',
+                    name: 'Moccasins',
+                    gender: 'male',
+                    image: 'images/moccasinsm.png',
+                    description: 'Traditional moccasins are designed for the specific terrain of a nation\'s territory. The beading patterns and construction methods vary across different Indigenous groups.',
+                    position: { top: '350px', left: '100px', width: '120px', height: '50px' }
+                },
+                {
+                    id: 'headdress',
+                    name: 'Ceremonial Headdress',
+                    gender: 'male',
+                    image: 'images/ceremonialheaddress.png',
+                    description: 'Headdresses are sacred items worn only on special ceremonial occasions. Different nations have distinct styles, and they are often earned through acts of bravery or leadership.',
+                    position: { top: '30px', left: '100px', width: '140px', height: '80px' }
+                },
+                {
+                    id: 'mukluks-f',
+                    name: 'Mukluks',
+                    gender: 'female',
+                    image: 'images/mukluksf.png',
+                    description: 'Mukluks are soft boots traditionally made by Inuit, Yupik, and other Arctic peoples. They\'re designed for extreme cold weather and are often made from sealskin or caribou hide with beautiful decorative elements.',
+                    position: { top: '350px', left: '100px', width: '120px', height: '50px' }
+                },
+                {
+                    id: 'mukluks-m',
+                    name: 'Mukluks',
+                    gender: 'male',
+                    image: 'images/mukluksm.png',
+                    description: 'Traditional mukluks are remarkably warm yet breathable, perfect for Arctic conditions. The designs and patterns often identify the maker\'s community.',
+                    position: { top: '350px', left: '100px', width: '120px', height: '50px' }
+                },
+                {
+                    id: 'metis-sash',
+                    name: 'Métis Sash',
+                    gender: 'male',
+                    image: 'images/metissashm.png',
+                    description: 'The Métis sash (L\'Assomption sash) is a finger-woven belt made of wool. Its vibrant colors each carry meaning, and historically it served many practical purposes from carrying supplies to emergency rope.',
+                    position: { top: '200px', left: '100px', width: '140px', height: '40px' }
+                },
+                {
+                    id: 'metis-sash-f',
+                    name: 'Métis Sash',
+                    gender: 'female',
+                    image: 'images/metissashf.png',
+                    description: 'The Métis sash symbolizes pride and cultural identity. The unique weaving pattern and bright colors represent the mixed European and Indigenous heritage of the Métis people.',
+                    position: { top: '180px', left: '100px', width: '140px', height: '40px' }
+                }
+            ];
+            
+            // NEW TIMER FUNCTIONS
+            function startTimer() {
+                gameActive = true;
+                seconds = 0;
+                updateTimerDisplay();
+                timer = setInterval(function() {
+                    seconds++;
+                    updateTimerDisplay();
+                }, 1000);
+            }
+            
+            function stopTimer() {
+                gameActive = false;
+                clearInterval(timer);
+            }
+            
+            function updateTimerDisplay() {
+                const minutes = Math.floor(seconds / 60);
+                const remainingSeconds = seconds % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+            }
+            
+            // NEW SCORE FUNCTIONS
+            function updateScore(points, action, itemName) {
+                score += points;
+                scoreDisplay.textContent = score;
+                
+                scoreHistory.push({
+                    action: action,
+                    item: itemName,
+                    points: points
+                });
+            }
+            
+            function calculateTimeBonus() {
+                let bonus = 10;
+                if (seconds < 30) {
+                    bonus = 50;
+                } else if (seconds < 60) {
+                    bonus = 40;
+                } else if (seconds < 90) {
+                    bonus = 30;
+                } else if (seconds < 120) {
+                    bonus = 20;
+                }
+                return bonus;
+            }
+            
+            function checkGameCompletion() {
+                if (clothingItems.childElementCount === 0) {
+                    gameOver();
+                }
+            }
+            
+            function gameOver() {
+                stopTimer();
+                
+                const timeBonus = calculateTimeBonus();
+                const finalScore = score + timeBonus;
+                
+                // Update score breakdown
+                scoreList.innerHTML = '';
+                scoreHistory.forEach(item => {
+                    const listItem = document.createElement('li');
+                    listItem.className = item.points > 0 ? 'correct' : 'incorrect';
+                    listItem.textContent = `${item.action} ${item.item}: ${item.points > 0 ? '+' : ''}${item.points}`;
+                    scoreList.appendChild(listItem);
+                });
+                
+                const timeBonusItem = document.createElement('li');
+                timeBonusItem.className = 'correct';
+                timeBonusItem.textContent = `Time Bonus: +${timeBonus}`;
+                scoreList.appendChild(timeBonusItem);
+                
+                finalScoreElement.textContent = finalScore;
+                overlayFinalScore.textContent = finalScore;
+                overlayTime.textContent = `Time: ${timerDisplay.textContent}`;
+                
+                let feedback = '';
+                if (finalScore >= 50) {
+                    feedback = "Amazing job! You're an expert on Indigenous clothing!";
+                } else if (finalScore >= 30) {
+                    feedback = "Great work! You've learned a lot about Indigenous clothing!";
+                } else if (finalScore >= 10) {
+                    feedback = "Good effort! Keep learning about Indigenous cultures!";
+                } else if (finalScore >= 0) {
+                    feedback = "Thanks for playing! Try again to learn more!";
+                } else {
+                    feedback = "Keep practicing to learn more about Indigenous clothing!";
+                }
+                
+                feedbackMessage.textContent = feedback;
+                overlayFeedback.textContent = feedback;
+                
+                gameOverOverlay.style.display = 'flex';
+                scoreBreakdown.style.display = 'block';
+            }
+            
+            // Initialize game
+            function initGame() {
+                // Reset UI
+                clothingItems.innerHTML = '';
+                scoreBreakdown.style.display = 'none';
+                gameOverOverlay.style.display = 'none';
+                
+                // Remove any placed clothing
+                document.querySelectorAll('.placed-clothing').forEach(item => item.remove());
+                
+                // Reset score and history
+                score = 0;
+                scoreHistory = [];
+                scoreDisplay.textContent = score;
+                
+                // Add clothing items to selection area
+                clothing.forEach(item => {
+                    const clothingElement = document.createElement('div');
+                    clothingElement.className = 'clothing-item';
+                    clothingElement.setAttribute('data-id', item.id);
+                    clothingElement.setAttribute('data-gender', item.gender);
+                    clothingElement.setAttribute('draggable', 'true');
+                    
+                    const imgElement = document.createElement('img');
+                    imgElement.src = item.image;
+                    imgElement.alt = item.name;
+                    
+                    clothingElement.appendChild(imgElement);
+                    clothingItems.appendChild(clothingElement);
+                    
+                    // Tooltip functionality
+                    clothingElement.addEventListener('mouseover', function(e) {
+                        tooltip.textContent = item.name + ': ' + item.description;
+                        tooltip.style.visibility = 'visible';
+                        tooltip.style.opacity = '1';
+                        tooltip.style.left = e.pageX + 10 + 'px';
+                        tooltip.style.top = e.pageY + 10 + 'px';
+                    });
+                    
+                    clothingElement.addEventListener('mousemove', function(e) {
+                        tooltip.style.left = e.pageX + 10 + 'px';
+                        tooltip.style.top = e.pageY + 10 + 'px';
+                    });
+                    
+                    clothingElement.addEventListener('mouseout', function() {
+                        tooltip.style.visibility = 'hidden';
+                        tooltip.style.opacity = '0';
+                    });
+                    
+                    // Drag functionality
+                    clothingElement.addEventListener('dragstart', function(e) {
+                        if (!gameActive) {
+                            startTimer();
+                        }
+                        e.dataTransfer.setData('text/plain', item.id);
+                    });
+                });
+                
+                // Make characters droppable
+                [femaleCharacter, maleCharacter].forEach(character => {
+                    character.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                    });
+                    
+                    character.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        const itemId = e.dataTransfer.getData('text/plain');
+                        const item = clothing.find(c => c.id === itemId);
+                        
+                        // Check if the gender matches
+                        const targetGender = this.id.includes('female') ? 'female' : 'male';
+                        if (item.gender !== targetGender) {
+                            updateScore(-1, "Wrong placement of", item.name);
+                            alert(`This item is for ${item.gender} characters! (-1 point)`);
+                            return;
+                        }
+                        
+                        // Remove existing clothing of the same type if any
+                        const existingItem = this.querySelector(`[data-id="${itemId}"]`);
+                        if (existingItem) {
+                            existingItem.remove();
+                        }
+                        
+                        // Create and position the placed clothing
+                        const placedClothing = document.createElement('div');
+                        placedClothing.className = 'clothing-slot placed-clothing';
+                        placedClothing.setAttribute('data-id', itemId);
+                        
+                        placedClothing.style.top = item.position.top;
+                        placedClothing.style.left = item.position.left;
+                        placedClothing.style.width = item.position.width;
+                        placedClothing.style.height = item.position.height;
+                        
+                        const imgElement = document.createElement('img');
+                        imgElement.src = item.image;
+                        imgElement.alt = item.name;
+                        imgElement.style.width = '100%';
+                        imgElement.style.height = '100%';
+                        imgElement.style.objectFit = 'contain';
+                        
+                        placedClothing.appendChild(imgElement);
+                        this.appendChild(placedClothing);
+                        
+                        // Remove from options
+                        document.querySelector(`.clothing-item[data-id="${itemId}"]`).remove();
+                        
+                        // Add tooltip for placed clothing
+                        placedClothing.addEventListener('mouseover', function(e) {
+                            tooltip.textContent = item.name + ': ' + item.description;
+                            tooltip.style.visibility = 'visible';
+                            tooltip.style.opacity = '1';
+                            tooltip.style.left = e.pageX + 10 + 'px';
+                            tooltip.style.top = e.pageY + 10 + 'px';
+                        });
+                        
+                        placedClothing.addEventListener('mousemove', function(e) {
+                            tooltip.style.left = e.pageX + 10 + 'px';
+                            tooltip.style.top = e.pageY + 10 + 'px';
+                        });
+                        
+                        placedClothing.addEventListener('mouseout', function() {
+                            tooltip.style.visibility = 'hidden';
+                            tooltip.style.opacity = '0';
+                        });
+                        
+                        // Award point for correct placement
+                        updateScore(1, "Correct placement of", item.name);
+                        
+                        // Make placed clothing removable on click
+                        placedClothing.addEventListener('click', function() {
+                            // Create a new clothing item for the selection area
+                            const newClothingElement = document.createElement('div');
+                            newClothingElement.className = 'clothing-item';
+                            newClothingElement.setAttribute('data-id', item.id);
+                            newClothingElement.setAttribute('data-gender', item.gender);
+                            newClothingElement.setAttribute('draggable', 'true');
+                            
+                            const newImgElement = document.createElement('img');
+                            newImgElement.src = item.image;
+                            newImgElement.alt = item.name;
+                            
+                            newClothingElement.appendChild(newImgElement);
+                            clothingItems.appendChild(newClothingElement);
+                            
+                            // Re-add event listeners to the new element
+                            newClothingElement.addEventListener('dragstart', function(e) {
+                                e.dataTransfer.setData('text/plain', item.id);
+                            });
+                            
+                            newClothingElement.addEventListener('mouseover', function(e) {
+                                tooltip.textContent = item.name + ': ' + item.description;
+                                tooltip.style.visibility = 'visible';
+                                tooltip.style.opacity = '1';
+                                tooltip.style.left = e.pageX + 10 + 'px';
+                                tooltip.style.top = e.pageY + 10 + 'px';
+                            });
+                            
+                            newClothingElement.addEventListener('mousemove', function(e) {
+                                tooltip.style.left = e.pageX + 10 + 'px';
+                                tooltip.style.top = e.pageY + 10 + 'px';
+                            });
+                            
+                            newClothingElement.addEventListener('mouseout', function() {
+                                tooltip.style.visibility = 'hidden';
+                                tooltip.style.opacity = '0';
+                            });
+                            
+                            // Remove the placed clothing
+                            this.remove();
+                        });
+                        
+                        // Check if game is complete
+                        checkGameCompletion();
+                    });
+                });
+            }
+            
+            // Restart button functionality
+            restartButton.addEventListener('click', function() {
+                stopTimer();
+                initGame();
+            });
+            
+            // Play again button functionality
+            playAgainButton.addEventListener('click', function() {
+                gameOverOverlay.style.display = 'none';
+                initGame();
+            });
+            
+            // Initialize game on load
+            initGame();
+        });
+    </script>
+</body>
+</html>
